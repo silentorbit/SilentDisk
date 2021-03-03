@@ -249,9 +249,50 @@ namespace SilentOrbit.Disk
             }
         }
 
+        /// <summary>
+        /// Delete directory and all files even if they are readonly
+        /// </summary>
+        public void DeleteDirReadOnly()
+        {
+            if (File.Exists(PathFull))
+                throw new InvalidOperationException("Expected a directory, found a file");
+
+            //First try simple method
+            try
+            {
+                Directory.Delete(LongPathFull, recursive: true);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            if (Directory.Exists(LongPathFull) == false)
+                return;
+
+            foreach (var d in GetDirectories())
+            {
+                var info = d.DirectoryInfo;
+                if (info.Attributes != FileAttributes.Normal)
+                    info.Attributes = FileAttributes.Normal;
+                d.DeleteDirReadOnly();
+            }
+
+            foreach (var f in GetFiles())
+            {
+                f.DeleteFile(); //Handles readonly attribute
+            }
+
+            Directory.Delete(LongPathFull);
+        }
+
         public void DeleteEmptyDir()
         {
-            Directory.Delete(LongPathFull, recursive: true);
+            Directory.Delete(LongPathFull, recursive: false);
         }
 
         #endregion
