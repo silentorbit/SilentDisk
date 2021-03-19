@@ -70,6 +70,8 @@ namespace SilentOrbit.Disk
             return new DirPath(path);
         }
 
+        public void Move(DirPath target) => Directory.Move(PathFull, target.PathFull);
+        
         public FilePath CombineFile(params string[] parts)
         {
             string path = PathFull;
