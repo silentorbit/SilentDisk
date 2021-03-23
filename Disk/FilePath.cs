@@ -97,6 +97,16 @@ namespace SilentOrbit.Disk
             return disk;
         }
 
+        public void SetLastWriteTimeUtc(FilePath file)
+        {
+            File.SetLastWriteTimeUtc(PathFull, File.GetLastWriteTimeUtc(file.PathFull));
+        }
+
+        public void SetLastWriteTimeUtc(DateTime modifiedUTC)
+        {
+            File.SetLastWriteTimeUtc(PathFull, modifiedUTC);
+        }
+
         public FilePath ReplaceEnd(string expectedEnd, string newEnd)
         {
             if (PathFull.EndsWith(expectedEnd))
@@ -211,6 +221,9 @@ namespace SilentOrbit.Disk
                 FileInfo.Attributes &= ~FileAttributes.Encrypted;
 
             File.Copy(PathFull, target.PathFull, overwrite: true);
+            //Preserve file dates
+            File.SetCreationTimeUtc(target.PathFull, File.GetCreationTimeUtc(PathFull));
+            target.SetLastWriteTimeUtc(this);
         }
 
         #endregion File content operations
