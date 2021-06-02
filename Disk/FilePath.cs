@@ -99,7 +99,12 @@ namespace SilentOrbit.Disk
 
         public void SetLastWriteTimeUtc(FilePath file)
         {
-            File.SetLastWriteTimeUtc(PathFull, File.GetLastWriteTimeUtc(file.PathFull));
+            var sourceUTC = File.GetLastWriteTimeUtc(file.PathFull);
+            var targetUTC = File.GetLastWriteTimeUtc(PathFull);
+            if (sourceUTC != targetUTC)
+            {
+                File.SetLastWriteTimeUtc(PathFull, sourceUTC);
+            }
         }
 
         public void SetLastWriteTimeUtc(DateTime modifiedUTC)
@@ -220,9 +225,19 @@ namespace SilentOrbit.Disk
             if ((FileInfo.Attributes & FileAttributes.Encrypted) != 0)
                 FileInfo.Attributes &= ~FileAttributes.Encrypted;
 
+            if (target.FileInfo.IsReadOnly)
+                target.ClearReadOnly();
+
             File.Copy(PathFull, target.PathFull, overwrite: true);
+
+            if (FileInfo.IsReadOnly) //Has now been copied to target file
+                target.ClearReadOnly(); //Required to allow modifying times
+
             //Preserve file dates
-            File.SetCreationTimeUtc(target.PathFull, File.GetCreationTimeUtc(PathFull));
+            var sourceCreationUTC = File.GetCreationTimeUtc(PathFull);
+            var targetCreationUTC = File.GetCreationTimeUtc(PathFull);
+            if (targetCreationUTC != sourceCreationUTC)
+                File.SetCreationTimeUtc(target.PathFull, targetCreationUTC);
             target.SetLastWriteTimeUtc(this);
         }
 
