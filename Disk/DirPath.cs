@@ -245,8 +245,9 @@ namespace SilentOrbit.Disk
                 }
                 catch (IOException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     Debug.Fail(ex.Message);
-                    System.Threading.Thread.Sleep(500);
+                    System.Threading.Thread.Sleep(3000);
                 }
             }
         }
