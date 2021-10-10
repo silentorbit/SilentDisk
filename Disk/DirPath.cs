@@ -269,11 +269,16 @@ namespace SilentOrbit.Disk
             {
                 Console.WriteLine(ex.Message);
             }
+            catch (DirectoryNotFoundException)
+            {
+                //All good
+                return;
+            }
             catch (IOException ex)
             {
                 Console.WriteLine(ex.Message);
             }
-
+            
             if (Directory.Exists(LongPathFull) == false)
                 return;
 
