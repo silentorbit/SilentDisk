@@ -28,16 +28,30 @@ namespace SilentOrbit.Disk
                 value = value.TrimEnd('\\');
             }
 
-            var full = Path.GetFullPath(value);
-            if (full != value)
-                throw new ArgumentException("Expected a full path: " + value + " != " + full);
+            var full = ValidateFullPath(value);
 
-            PathFull = value;
+            PathFull = full;
 
             if (PathFull.StartsWith(@"\\"))
                 LongPathFull = PathFull;
             else
                 LongPathFull = @"\\?\" + PathFull;
+        }
+
+        string ValidateFullPath(string value)
+        {
+            var full = Path.GetFullPath(value);
+            if (full == value)
+                return full;
+
+            if (full.ToLowerInvariant() == value.ToLowerInvariant())
+                return full;
+
+            Debug.Assert(full.Length == value.Length);
+            for (int n = 0; n < full.Length; n++)
+                Debug.Assert(full[n] == value[n]);
+
+            throw new ArgumentException("Expected a full path: " + value + " != " + full);
         }
 
         #region Path string operations
