@@ -13,6 +13,11 @@ namespace SilentOrbit.Disk
     {
         #region Static
 
+        /// <summary>
+        /// C:\Users\[Username]
+        /// </summary>
+        public static DirPath ProfileDir { get; } = new DirPath(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+
         public static DirPath GetCurrentDirectory() => (DirPath)Directory.GetCurrentDirectory();
 
         #endregion
