@@ -11,7 +11,8 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>SilentOrbit.SilentDisk</PackageId>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
+    <Authors>hultqvist</Authors>
     <Company>SilentOrbit</Company>
     <Title>SilentDisk - Strongly typed file paths</Title>
     <PackageProjectUrl>https://github.com/silentorbit/SilentDisk</PackageProjectUrl>
