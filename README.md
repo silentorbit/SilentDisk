@@ -2,12 +2,14 @@
 
 Helper classes for safely managing file paths on disk
 
-## Source code, 
-https://github.com/silentorbit/SilentDisk
+## Links
+
+ * [NuGet](https://www.nuget.org/packages/SilentDisk/)
+ * [GitHub](https://github.com/silentorbit/SilentDisk)
 
 ## Example
 
-```
+```C#
 //Creating paths (nothing is changed on disk)
 FilePath file = (FilePath)@"C:\Hello\World";
 DirPath directory = file.Parent; // C:\Hello
