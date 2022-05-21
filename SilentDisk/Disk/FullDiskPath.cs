@@ -71,11 +71,6 @@ public abstract class FullDiskPath : IComparable
         return Path.EndsWith(name);
     }
 
-    /// <summary>
-    /// Length of path string.
-    /// </summary>
-    public int Length => Path.Length;
-
     public override string ToString() => Path;
 
     #endregion
