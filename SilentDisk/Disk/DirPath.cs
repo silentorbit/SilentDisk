@@ -307,7 +307,7 @@ public partial class DirPath : FullDiskPath
 
     public static RelFilePath operator -(FilePath path, DirPath root)
     {
-        if (path.Path.StartsWith(root.Path + System.IO.Path.DirectorySeparatorChar) == false)
+        if (path.StartsWith(root) == false)
             throw new ArgumentException("path must be in the Source directory");
 
         var rel = path.Path.Substring(root.Path.Length).TrimStart('\\');
@@ -323,10 +323,8 @@ public partial class DirPath : FullDiskPath
 
     public static RelDirPath operator -(DirPath path, DirPath root)
     {
-        if (path.Path.StartsWith(root.Path + System.IO.Path.DirectorySeparatorChar) == false)
-        {
+        if (path.StartsWith(root) == false)
             throw new ArgumentException("path must be in the Source directory");
-        }
 
         var rel = path.Path.Substring(root.Path.Length).TrimStart('\\');
         return new RelDirPath(rel);

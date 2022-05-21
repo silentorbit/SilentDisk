@@ -63,7 +63,16 @@ public abstract class FullDiskPath : IComparable
 
     public bool StartsWith(FullDiskPath test)
     {
-        return Path.StartsWith(test.Path);
+        if (Path.StartsWith(test.Path) == false)
+            return false;
+
+        if (Path.Length == test.Path.Length)
+            return true;
+
+        if (Path[test.Path.Length] == System.IO.Path.DirectorySeparatorChar)
+            return true;
+
+        return false;
     }
 
     public bool EndsWith(string name)
