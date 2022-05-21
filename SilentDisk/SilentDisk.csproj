@@ -10,7 +10,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>SilentDisk</PackageId>
+    <PackageId>SilentOrbit.SilentDisk</PackageId>
     <Version>0.0.4</Version>
     <Company>SilentOrbit</Company>
     <Title>SilentDisk - Strongly typed file paths</Title>
