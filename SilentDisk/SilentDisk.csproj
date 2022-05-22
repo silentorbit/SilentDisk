@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <PackageId>SilentOrbit.SilentDisk</PackageId>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
 
     <Authors>hultqvist</Authors>
     <Company>SilentOrbit</Company>
@@ -22,7 +22,6 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <DebugType>embedded</DebugType>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
