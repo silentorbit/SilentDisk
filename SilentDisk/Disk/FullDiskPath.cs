@@ -21,7 +21,7 @@ public abstract class FullDiskPath : BasePath, IComparable
         }
         else
         {
-            path = path.TrimEnd('\\');
+            path = path.TrimEnd('\\', '/');
         }
 
         var full = System.IO.Path.GetFullPath(path);

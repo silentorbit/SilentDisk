@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <PackageId>SilentOrbit.SilentDisk</PackageId>
-    <Version>0.0.8</Version>
+    <Version>0.0.9</Version>
 
     <Authors>hultqvist</Authors>
     <Company>SilentOrbit</Company>

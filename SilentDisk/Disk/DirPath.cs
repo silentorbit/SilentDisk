@@ -162,8 +162,13 @@ public partial class DirPath : FullDiskPath
             //if (File.GetAttributes(f).HasFlag(FileAttributes.ReadOnly) == false)
             //    continue;
 
-            if (preserveGit && f.Path.Contains("\\.git\\"))
-                continue;
+            if (preserveGit)
+            {
+                if (f.Path.Contains("\\.git"))
+                    continue;
+                if (f.Path.Contains("/.git"))
+                    continue;
+            }
 
             f.SetAttributes(FileAttributes.Normal);
             f.DeleteFile();
@@ -283,9 +288,9 @@ public partial class DirPath : FullDiskPath
     public static RelFilePath operator -(FilePath path, DirPath root)
     {
         if (path.StartsWith(root) == false)
-            throw new ArgumentException("path must be in the Source directory");
+            throw new ArgumentException($"path({path}) must be in the root({root}) directory");
 
-        var rel = path.Path.Substring(root.Path.Length).TrimStart('\\');
+        var rel = path.Path.Substring(root.Path.Length).TrimStart('\\', '/');
         return new RelFilePath(rel);
     }
 
@@ -297,9 +302,9 @@ public partial class DirPath : FullDiskPath
     public static RelDirPath operator -(DirPath path, DirPath root)
     {
         if (path.StartsWith(root) == false)
-            throw new ArgumentException("path must be in the Source directory");
+            throw new ArgumentException($"path({path}) must be in the root({root}) directory");
 
-        var rel = path.Path.Substring(root.Path.Length).TrimStart('\\');
+        var rel = path.Path.Substring(root.Path.Length).TrimStart('\\', '/');
         return new RelDirPath(rel);
     }
 

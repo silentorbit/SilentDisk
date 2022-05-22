@@ -11,7 +11,7 @@ public class RelDiskPath : BasePath
     public RelDiskPath(string relativePath) : base(relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar))
     {
         if (Path.StartsWith(System.IO.Path.DirectorySeparatorChar + ""))
-            throw new ArgumentException("Rel paths can't start with " + System.IO.Path.DirectorySeparatorChar);
+            throw new ArgumentException("Rel paths can't start with " + System.IO.Path.DirectorySeparatorChar + ": " + relativePath);
 
         RelativePath = Path;
     }
