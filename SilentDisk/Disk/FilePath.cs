@@ -121,10 +121,6 @@ public class FilePath : FullDiskPath
 
     public string FileName => Name;
 
-    public string FileNameWithoutExtension => System.IO.Path.GetFileNameWithoutExtension(Path);
-
-    public string Extension => System.IO.Path.GetExtension(Path);
-
     #endregion
 
     #region File content operations
@@ -196,7 +192,7 @@ public class FilePath : FullDiskPath
         var targetPath = this;
         while (targetPath.Exists())
         {
-            var m = reUniqueSuffix.Match(targetPath.FileNameWithoutExtension);
+            var m = reUniqueSuffix.Match(targetPath.NameWithoutExtension);
             if (m.Success)
             {
                 var filename = m.Groups[1].Value + " (" + (int.Parse(m.Groups[2].Value) + 1) + ")" + targetPath.Extension;
@@ -204,7 +200,7 @@ public class FilePath : FullDiskPath
             }
             else
             {
-                targetPath = targetPath.Parent.CombineFile(targetPath.FileNameWithoutExtension + " (1)" + targetPath.Extension);
+                targetPath = targetPath.Parent.CombineFile(targetPath.NameWithoutExtension + " (1)" + targetPath.Extension);
             }
         }
         return targetPath;

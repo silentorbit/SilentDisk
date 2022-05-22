@@ -21,7 +21,7 @@ internal class Example
         //Exploring disk
         IEnumerable<FilePath> files = directory.GetFiles("*", SearchOption.AllDirectories);
         IEnumerable<DirPath> directories = directory.GetDirectories();
-        var baseName = file.FileNameWithoutExtension;
+        var baseName = file.NameWithoutExtension;
         bool fileExists = file.Exists();
         bool dirExists = directory.Exists();
 

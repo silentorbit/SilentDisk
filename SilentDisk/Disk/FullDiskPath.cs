@@ -4,62 +4,41 @@ namespace SilentOrbit.Disk;
 /// <summary>
 /// Base class for <see cref="FilePath"/> and <see cref="DirPath"/>
 /// </summary>
-public abstract class FullDiskPath : IComparable
+public abstract class FullDiskPath : BasePath, IComparable
 {
-    /// <summary>
-    /// Full path
-    /// </summary>
-    public readonly string Path;
-
     public abstract bool Exists();
 
-    protected FullDiskPath(string value)
+    protected FullDiskPath(string path) : base(ConstructorPath(path))
     {
-        if (value.EndsWith(":\\"))
+
+    }
+
+    static string ConstructorPath(string path)
+    {
+        if (path.EndsWith(":\\"))
         {
             //Keep "C:\\"
         }
         else
         {
-            value = value.TrimEnd('\\');
+            path = path.TrimEnd('\\');
         }
 
-        var full = ValidateFullPath(value);
-
-        Path = full;
-    }
-
-    string ValidateFullPath(string value)
-    {
-        var full = System.IO.Path.GetFullPath(value);
-        if (full == value)
+        var full = System.IO.Path.GetFullPath(path);
+        if (full == path)
             return full;
 
-        if (full.ToLowerInvariant() == value.ToLowerInvariant())
+        if (full.ToLowerInvariant() == path.ToLowerInvariant())
             return full;
 
-        Debug.Assert(full.Length == value.Length);
+        Debug.Assert(full.Length == path.Length);
         for (int n = 0; n < full.Length; n++)
-            Debug.Assert(full[n] == value[n]);
+            Debug.Assert(full[n] == path[n]);
 
-        throw new ArgumentException("Expected a full path: " + value + " != " + full);
+        throw new ArgumentException("Expected a full path: " + path + " != " + full);
     }
 
     #region Path string operations
-
-    /// <summary>
-    /// File or directory name.
-    /// </summary>
-    public virtual string Name
-    {
-        get
-        {
-            var n = System.IO.Path.GetFileName(Path);
-            if (string.IsNullOrEmpty(n))
-                throw new InvalidProgramException();
-            return n;
-        }
-    }
 
     public bool StartsWith(FullDiskPath test)
     {

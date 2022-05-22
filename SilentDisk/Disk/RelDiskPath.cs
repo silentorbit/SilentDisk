@@ -4,18 +4,16 @@ namespace SilentOrbit.Disk;
 /// <summary>
 /// Relative path within a filesystem to a file or directory.
 /// </summary>
-public class RelDiskPath
+public class RelDiskPath : BasePath
 {
     public readonly string RelativePath;
 
-    public RelDiskPath(string relativePath)
+    public RelDiskPath(string relativePath) : base(relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar))
     {
-        relativePath = relativePath.Replace('/', '\\');
+        if (Path.StartsWith(System.IO.Path.DirectorySeparatorChar + ""))
+            throw new ArgumentException("Rel paths can't start with " + System.IO.Path.DirectorySeparatorChar);
 
-        if (relativePath.StartsWith("\\"))
-            throw new ArgumentException("Rel paths can't start with \\");
-
-        RelativePath = relativePath;
+        RelativePath = Path;
     }
 
     public static explicit operator RelDiskPath(string value)
@@ -25,11 +23,7 @@ public class RelDiskPath
 
     #region String operations
 
-    public string Name => Path.GetFileName(RelativePath);
-
     public override string ToString() => RelativePath;
-
-    public string FileNameWithoutExtension => Path.GetFileNameWithoutExtension(RelativePath);
 
     public bool StartsWith(string relPath) => RelativePath.StartsWith(relPath);
 
@@ -39,11 +33,11 @@ public class RelDiskPath
 
     public static RelDiskPath operator +(RelDiskPath a, RelDiskPath b)
     {
-        var path = Path.Combine(a.RelativePath, b.RelativePath);
+        var path = System.IO.Path.Combine(a.RelativePath, b.RelativePath);
         return new RelDiskPath(path);
     }
 
-    public RelDirPath Parent => new RelDirPath(Path.GetDirectoryName(RelativePath));
+    public RelDirPath Parent => new RelDirPath(System.IO.Path.GetDirectoryName(RelativePath));
 
     public RelDiskPath Combine(params string[] parts)
     {

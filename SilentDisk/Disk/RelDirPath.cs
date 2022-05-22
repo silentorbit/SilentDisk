@@ -16,20 +16,20 @@ public class RelDirPath : RelDiskPath
     {
         var path = this.RelativePath;
         foreach (var p in parts)
-            path = Path.Combine(path, p.RelativePath);
+            path = PathCombine(path, p.RelativePath);
 
         return new RelFilePath(path);
     }
 
     public static RelFilePath operator +(RelDirPath a, RelFilePath b)
     {
-        var path = Path.Combine(a.RelativePath, b.RelativePath);
+        var path = PathCombine(a.RelativePath, b.RelativePath);
         return new RelFilePath(path);
     }
 
     public static RelDirPath operator +(RelDirPath a, RelDirPath b)
     {
-        var path = Path.Combine(a.RelativePath, b.RelativePath);
+        var path = PathCombine(a.RelativePath, b.RelativePath);
         return new RelDirPath(path);
     }
 }

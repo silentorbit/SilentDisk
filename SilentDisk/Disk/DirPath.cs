@@ -1,5 +1,4 @@
-﻿
-namespace SilentOrbit.Disk;
+﻿namespace SilentOrbit.Disk;
 
 /// <summary>
 /// Full path to a directory
@@ -60,7 +59,7 @@ public partial class DirPath : FullDiskPath
     {
         string path = Path;
         foreach (var p in parts)
-            path = Combine(path, p);
+            path = PathCombine(path, p);
 
         return new DirPath(path);
     }
@@ -71,22 +70,9 @@ public partial class DirPath : FullDiskPath
     {
         string path = Path;
         foreach (var p in parts)
-            path = Combine(path, p);
+            path = PathCombine(path, p);
 
         return new FilePath(path);
-    }
-
-    /// <summary>
-    /// Accepth both '/' and '\' as separators.
-    /// Treat all subpaths as relative paths, trim '\' before combining.
-    /// </summary>
-    private static string Combine(string basePath, string subPath)
-    {
-        subPath = subPath.Replace('/', '\\');
-        Debug.Assert(System.IO.Path.GetFullPath(basePath) == basePath, "Expected full path");
-        Debug.Assert(subPath.StartsWith(@"\") == false, "Found leading / in subPath");
-        subPath = subPath.Trim('\\');
-        return System.IO.Path.Combine(basePath, subPath);
     }
 
     #endregion
@@ -94,17 +80,6 @@ public partial class DirPath : FullDiskPath
     #region Directory properties
 
     public override bool Exists() => Directory.Exists(Path);
-
-    public override string Name
-    {
-        get
-        {
-            if (DirectoryInfo.Parent == null)
-                return Path;
-            else
-                return base.Name;
-        }
-    }
 
     #endregion
 
@@ -314,12 +289,10 @@ public partial class DirPath : FullDiskPath
         return new RelFilePath(rel);
     }
 
-
     public static FilePath operator +(DirPath root, RelFilePath rel)
     {
-        return new FilePath(System.IO.Path.Combine(root.Path, rel.RelativePath));
+        return new FilePath(PathCombine(root.Path, rel.RelativePath));
     }
-
 
     public static RelDirPath operator -(DirPath path, DirPath root)
     {
