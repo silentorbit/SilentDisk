@@ -16,6 +16,8 @@ public class BasePath
 
     public BasePath(string path)
     {
+        path = path.Replace('/', DirectorySeparatorChar);
+        path = path.Replace('\\', DirectorySeparatorChar);
         Path = path;
     }
 
