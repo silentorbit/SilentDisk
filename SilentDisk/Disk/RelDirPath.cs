@@ -21,4 +21,15 @@ public class RelDirPath : RelDiskPath
         return new RelFilePath(path);
     }
 
+    public static RelFilePath operator +(RelDirPath a, RelFilePath b)
+    {
+        var path = Path.Combine(a.RelativePath, b.RelativePath);
+        return new RelFilePath(path);
+    }
+
+    public static RelDirPath operator +(RelDirPath a, RelDirPath b)
+    {
+        var path = Path.Combine(a.RelativePath, b.RelativePath);
+        return new RelDirPath(path);
+    }
 }

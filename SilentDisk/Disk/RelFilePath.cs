@@ -15,4 +15,11 @@ public class RelFilePath : RelDiskPath
     {
         return new RelFilePath(base.RelativePath + text);
     }
+
+    public static explicit operator RelFilePath(string value)
+    {
+        if(value == null)
+            return null;
+        return new RelFilePath(value);
+    }
 }
