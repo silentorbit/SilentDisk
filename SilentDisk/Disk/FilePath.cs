@@ -229,14 +229,14 @@ public class FilePath : FullDiskPath
     /// <summary>
     /// Find a new filename that doesn't exist on disk
     /// </summary>
-    FilePath FindTmp()
+    public TmpFile FindTmp()
     {
         var r = new Random();
         while (true)
         {
             var tmp = AppendPath("-" + r.Next() + "-tmp");
             if (tmp.Exists() == false)
-                return tmp;
+                return new TmpFile(tmp.FileInfo);
         }
     }
 
