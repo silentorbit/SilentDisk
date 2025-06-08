@@ -18,7 +18,7 @@ public class RelFilePath : RelDiskPath
 
     public static explicit operator RelFilePath(string value)
     {
-        if(value == null)
+        if (value == null)
             return null;
         return new RelFilePath(value);
     }
