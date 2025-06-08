@@ -3,7 +3,7 @@ using SilentOrbit.Disk;
 
 namespace SilentOrbit;
 
-internal class Example
+class Example
 {
     public void Demo()
     {
