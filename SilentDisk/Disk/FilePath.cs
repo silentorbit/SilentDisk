@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SilentOrbit.Disk;
 
@@ -213,6 +214,32 @@ public class FilePath : FullDiskPath
         //Atomic
         var tmp = FindTmp();
         File.WriteAllText(tmp.Path, text, new UTF8Encoding(false, true));
+
+        //Read only generated files
+        if (Exists())
+            FileInfo.Attributes = FileAttributes.Normal;
+
+        var delete = this.AppendPath("-delete");
+        if (Exists())
+            File.Move(Path, delete.Path);
+        File.Move(tmp.Path, Path);
+        if (delete.Exists())
+            delete.DeleteFile();
+    }
+
+    /// <summary>
+    /// Atomic write to file using a stream.
+    /// </summary>
+    public void WriteStream(Action<Stream> action)
+    {
+        Parent.CreateDirectory();
+
+        //Atomic
+        var tmp = FindTmp();
+        using (var stream = new FileStream(tmp.Path, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            action(stream);
+        }
 
         //Read only generated files
         if (Exists())
