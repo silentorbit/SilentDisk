@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SilentOrbit.Disk;
 
