@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <PackageId>SilentOrbit.SilentDisk</PackageId>
-    <Version>0.0.9</Version>
+    <Version>0.9</Version>
 
     <Authors>hultqvist</Authors>
     <Company>SilentOrbit</Company>
@@ -26,6 +26,9 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <Description>Strongly typed disk paths.
+Secure path combination, preventing escape by ../</Description>
   </PropertyGroup>
 
   <ItemGroup>
