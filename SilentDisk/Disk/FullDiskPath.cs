@@ -2,13 +2,14 @@
 namespace SilentOrbit.Disk;
 
 /// <summary>
+/// Represents a file or directory path on disk.
 /// Base class for <see cref="FilePath"/> and <see cref="DirPath"/>
 /// </summary>
-public abstract class FullDiskPath : BasePath, IComparable
+public class FullDiskPath : BasePath, IComparable
 {
-    public abstract bool Exists();
+    public virtual bool Exists() => File.Exists(Path) || Directory.Exists(Path);
 
-    protected FullDiskPath(string path) : base(ConstructorPath(path))
+    public FullDiskPath(string path) : base(ConstructorPath(path))
     {
 
     }

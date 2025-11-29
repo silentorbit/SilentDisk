@@ -313,5 +313,19 @@ public partial class DirPath : FullDiskPath
         return new DirPath(System.IO.Path.Combine(root.Path, rel.RelativePath));
     }
 
+    public static RelDiskPath operator -(FullDiskPath path, DirPath root)
+    {
+        if (path.StartsWith(root) == false)
+            throw new ArgumentException($"path({path}) must be in the root({root}) directory");
+
+        var rel = path.Path.Substring(root.Path.Length).TrimStart('\\', '/');
+        return new RelDiskPath(rel);
+    }
+
+    public static FullDiskPath operator +(DirPath root, RelDiskPath rel)
+    {
+        return new FullDiskPath(System.IO.Path.Combine(root.Path, rel.RelativePath));
+    }
+
     #endregion
 }
