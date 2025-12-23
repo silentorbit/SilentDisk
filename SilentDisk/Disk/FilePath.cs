@@ -244,12 +244,17 @@ public class FilePath : FullDiskPath
         if (Exists())
             FileInfo.Attributes = FileAttributes.Normal;
 
-        var delete = this.AppendPath("-delete");
         if (Exists())
+        {
+            var delete = this.AppendPath("-delete");
             File.Move(Path, delete.Path);
-        File.Move(tmp.Path, Path);
-        if (delete.Exists())
+            File.Move(tmp.Path, Path);
             delete.DeleteFile();
+        }
+        else
+        {
+            File.Move(tmp.Path, Path);
+        }
     }
 
     /// <summary>
