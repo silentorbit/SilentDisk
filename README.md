@@ -4,8 +4,8 @@ Helper classes for safely managing file paths on disk
 
 ## Links
 
- * [NuGet](https://www.nuget.org/packages/SilentDisk/)
- * [GitHub](https://github.com/silentorbit/SilentDisk)
+ * [Install via NuGet](https://www.nuget.org/packages/SilentOrbit.SilentDisk/)
+ * [View source on GitHub](https://github.com/silentorbit/SilentDisk)
 
 ## Example
 
