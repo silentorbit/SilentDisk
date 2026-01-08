@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SilentOrbit.Disk;
 
@@ -56,7 +57,17 @@ public class FilePath : FullDiskPath
         {
             Debug.Fail(ex.Message);
             System.Threading.Thread.Sleep(500);
-            File.Delete(Path);
+            try
+            {
+                File.Delete(Path);
+                return;
+            }
+            catch
+            {
+                //Failed a second time, throw first exception.
+            }
+            //Throw first exception
+            throw;
         }
     }
 
@@ -69,9 +80,13 @@ public class FilePath : FullDiskPath
     /// <summary>
     /// Adds to path without adding path separator
     /// </summary>
-    /// <param name="text"></param>
-    /// <returns></returns>
-    public FilePath AppendPath(string text)
+    [Obsolete($"Renamed to {nameof(AppendSuffix)}() to more clearly describe the function.")]
+    public FilePath AppendPath(string text) => AppendSuffix(text);
+
+    /// <summary>
+    /// Adds to path without adding path separator
+    /// </summary>
+    public FilePath AppendSuffix(string text)
     {
         return new FilePath(Path + text);
     }
@@ -130,12 +145,17 @@ public class FilePath : FullDiskPath
         return File.ReadAllBytes(Path);
     }
 
-    public string ContentHash()
+    [Obsolete($"Use explicit hash methods such as {nameof(ContentSHA1)}")]
+    public string ContentHash() => ContentHash(SHA1.Create());
+    public string ContentSHA1() => ContentHash(SHA1.Create());
+    public string ContentSHA256() => ContentHash(SHA256.Create());
+    public string ContentHash(HashAlgorithm algorithm)
     {
-        var content = ReadAllBytes();
-        using (SHA1 sha1 = SHA1.Create())
+        using (var stream = new FileStream(Path, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (algorithm)
         {
-            return BitConverter.ToString(sha1.ComputeHash(content));
+            var hash = algorithm.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "");
         }
     }
 
@@ -185,8 +205,9 @@ public class FilePath : FullDiskPath
 
     /// <summary>
     /// Makes sure the file doesn't exist.
-    /// Add " (1)" and increase numbers until there is no existing file there.
+    /// Adds " (1)" and increase numbers until there is no existing file there.
     /// </summary>
+    [Obsolete($"Prefer {nameof(CreateUnique)} that creates the file.")]
     public FilePath MakeUnique()
     {
         var targetPath = this;
@@ -206,6 +227,42 @@ public class FilePath : FullDiskPath
         return targetPath;
     }
 
+    /// <summary>
+    /// Creates a new file that didn't exist.
+    /// Adds " (1)" and increase numbers until there is no existing file there.
+    /// </summary>
+    public FilePath CreateUnique()
+    {
+        Parent.CreateDirectory();
+
+        var targetPath = this;
+        while (true)
+        {
+            try
+            {
+                using var stream = new FileStream(targetPath.Path, FileMode.CreateNew, FileAccess.Write);
+                return targetPath;
+            }
+            catch (IOException)
+            {
+                if (File.Exists(targetPath.Path) == false)
+                    throw;
+                //File already exists, try another name.
+            }
+
+            var m = reUniqueSuffix.Match(targetPath.NameWithoutExtension);
+            if (m.Success)
+            {
+                var filename = m.Groups[1].Value + " (" + (int.Parse(m.Groups[2].Value) + 1) + ")" + targetPath.Extension;
+                targetPath = targetPath.Parent.CombineFile(filename);
+            }
+            else
+            {
+                targetPath = targetPath.Parent.CombineFile(targetPath.NameWithoutExtension + " (1)" + targetPath.Extension);
+            }
+        }
+    }
+
     public void WriteAllText(string text)
     {
         Parent.CreateDirectory();
@@ -213,17 +270,7 @@ public class FilePath : FullDiskPath
         //Atomic
         var tmp = FindTmp();
         File.WriteAllText(tmp.Path, text, new UTF8Encoding(false, true));
-
-        //Read only generated files
-        if (Exists())
-            FileInfo.Attributes = FileAttributes.Normal;
-
-        var delete = this.AppendPath("-delete");
-        if (Exists())
-            File.Move(Path, delete.Path);
-        File.Move(tmp.Path, Path);
-        if (delete.Exists())
-            delete.DeleteFile();
+        AtomicReplace(tmp);
     }
 
     /// <summary>
@@ -235,26 +282,56 @@ public class FilePath : FullDiskPath
 
         //Atomic
         var tmp = FindTmp();
-        using (var stream = new FileStream(tmp.Path, FileMode.Create, FileAccess.Write, FileShare.None))
+        using (var stream = new FileStream(tmp.Path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         {
             action(stream);
         }
+        AtomicReplace(tmp);
+    }
 
+    void AtomicReplace(TmpFile tmp)
+    {
         //Read only generated files
         if (Exists())
-            FileInfo.Attributes = FileAttributes.Normal;
-
-        if (Exists())
         {
-            var delete = this.AppendPath("-delete");
-            File.Move(Path, delete.Path);
-            File.Move(tmp.Path, Path);
-            delete.DeleteFile();
+            FileInfo.Refresh();
+
+            if (FileInfo.Attributes != FileAttributes.Normal)
+            {
+
+                var backup = FileInfo.Attributes;
+                FileInfo.Attributes = FileAttributes.Normal;
+                try
+                {
+                    AtomicReplace2(tmp);
+                }
+                finally
+                {
+                    FileInfo.Refresh();
+                    FileInfo.Attributes = backup;
+                }
+            }
+            else
+            {
+                AtomicReplace2(tmp);
+            }
         }
         else
         {
-            File.Move(tmp.Path, Path);
+            AtomicReplace2(tmp);
         }
+    }
+
+    private void AtomicReplace2(TmpFile tmp)
+    {
+#if NETCOREAPP
+        File.Move(tmp.Path, Path, overwrite: true);
+#else
+        if (Exists())
+            File.Replace(tmp.Path, Path, null);
+        else
+            File.Move(tmp.Path, Path);
+#endif
     }
 
     /// <summary>
@@ -262,10 +339,9 @@ public class FilePath : FullDiskPath
     /// </summary>
     public TmpFile FindTmp()
     {
-        var r = new Random();
         while (true)
         {
-            var tmp = AppendPath("-" + r.Next() + "-tmp");
+            var tmp = AppendSuffix("-" + System.IO.Path.GetRandomFileName() + "-tmp");
             if (tmp.Exists() == false)
                 return new TmpFile(tmp.FileInfo);
         }
@@ -293,7 +369,7 @@ public class FilePath : FullDiskPath
 
         //Preserve file dates
         var sourceCreationUTC = File.GetCreationTimeUtc(Path);
-        var targetCreationUTC = File.GetCreationTimeUtc(Path);
+        var targetCreationUTC = File.GetCreationTimeUtc(target.Path);
         if (targetCreationUTC != sourceCreationUTC)
             File.SetCreationTimeUtc(target.Path, targetCreationUTC);
         target.SetLastWriteTimeUtc(this);

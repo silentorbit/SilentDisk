@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.InteropServices;
+
 namespace SilentOrbit.Disk;
 
 /// <summary>
@@ -16,48 +18,55 @@ public class FullDiskPath : BasePath, IComparable
 
     static string ConstructorPath(string path)
     {
-        if (path.EndsWith(":\\"))
-        {
-            //Keep "C:\\"
-        }
-        else
-        {
-            path = path.TrimEnd('\\', '/');
-        }
+        //Keep C:\
+        var root = System.IO.Path.GetPathRoot(path);
+
+        // Only trim trailing separators if it's NOT just a root (e.g. trim "C:\Temp\" -> "C:\Temp", but keep "C:\")
+        if (path.Length > root.Length)
+            path = path.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
 
         var full = System.IO.Path.GetFullPath(path);
-        if (full == path)
-            return full;
 
-        if (full.ToLowerInvariant() == path.ToLowerInvariant())
+        if (PathEquals(full, path))
             return full;
-
-        Debug.Assert(full.Length == path.Length);
-        for (int n = 0; n < full.Length; n++)
-            Debug.Assert(full[n] == path[n]);
 
         throw new ArgumentException("Expected a full path: " + path + " != " + full);
     }
+
+    static bool PathEquals(string path1, string path2)
+        => string.Equals(path1, path2, PathComparison);
+
+    /// <summary>
+    /// Case Sensitivity based on OS
+    /// </summary>
+    static StringComparison PathComparison =>
+        RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
 
     #region Path string operations
 
     public bool StartsWith(FullDiskPath test)
     {
-        if (Path.StartsWith(test.Path) == false)
+        if (test is null)
+            return false;
+
+        if (Path.StartsWith(test.Path, PathComparison) == false)
             return false;
 
         if (Path.Length == test.Path.Length)
             return true;
 
-        if (Path[test.Path.Length] == System.IO.Path.DirectorySeparatorChar)
-            return true;
-
-        return false;
+        // Boundary Check: Prevent "C:\Program Files" matching "C:\Program"
+        // We check if the next char in our Path is a separator.
+        char separator = Path[test.Path.Length];
+        return separator == System.IO.Path.DirectorySeparatorChar ||
+               separator == System.IO.Path.AltDirectorySeparatorChar;
     }
 
     public bool EndsWith(string name)
     {
-        return Path.EndsWith(name);
+        return Path.EndsWith(name, PathComparison);
     }
 
     public override string ToString() => Path;
@@ -77,7 +86,7 @@ public class FullDiskPath : BasePath, IComparable
 
         Debug.Assert(a.GetType() == b.GetType());
 
-        return a.Path == b.Path;
+        return PathEquals(a.Path, b.Path);
     }
 
     public static bool operator !=(FullDiskPath a, FullDiskPath b)
@@ -87,7 +96,9 @@ public class FullDiskPath : BasePath, IComparable
 
     public override bool Equals(object obj)
     {
-        return ((FullDiskPath)obj).Path == Path;
+        if (obj is FullDiskPath fdp)
+            return PathEquals(fdp.Path, Path);
+        return false;
     }
 
     public override int GetHashCode()
