@@ -179,12 +179,23 @@ public class FilePath : FullDiskPath
     }
 
     public void Move(FilePath target) => File.Move(Path, target.Path);
+#if NETCOREAPP
+    public void Move(FilePath target, bool overwrite) => File.Move(Path, target.Path, overwrite: overwrite);
+#endif
     public FilePath Move(DirPath target)
     {
         var targetFile = target.CombineFile(Name);
-        File.Move(Path, targetFile.Path);
+        Move(targetFile);
         return targetFile;
     }
+#if NETCOREAPP
+    public FilePath Move(DirPath target, bool overwrite)
+    {
+        var targetFile = target.CombineFile(Name);
+        Move(targetFile, overwrite: overwrite);
+        return targetFile;
+    }
+#endif
 
     public string ReadAllText() => File.ReadAllText(Path, Encoding.UTF8);
 
